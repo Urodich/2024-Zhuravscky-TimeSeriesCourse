@@ -25,6 +25,7 @@ class TimeSeriesHierarchicalClustering:
         self.method: str = method
         self.model: AgglomerativeClustering | None = None
         self.linkage_matrix: np.ndarray | None = None
+        self.labels_: np.ndarray
 
 
     def _create_linkage_matrix(self) -> np.ndarray:
@@ -66,7 +67,15 @@ class TimeSeriesHierarchicalClustering:
         self: the fitted model
         """
 
-       # INSERT YOUR CODE
+        # INSERT YOUR CODE
+
+        self.model = AgglomerativeClustering(n_clusters=self.n_clusters, metric='precomputed', linkage='average', compute_distances=True)
+
+        # Подгоняем модель с использованием матрицы расстояний
+        self.model.fit(distance_matrix)
+        self.labels_ = self.model.labels_
+        
+        self.linkage_matrix = self._create_linkage_matrix()
 
         return self
 
@@ -116,7 +125,7 @@ class TimeSeriesHierarchicalClustering:
 
             # get leafnode name, which corresponds to original data index
             leafnode = leaves[cnt]
-            ts = dx[leafnode]
+            ts = dx[leafnode + 1]
             ts_len = ts.shape[0] - 1
 
             label = int(labels[leafnode])
